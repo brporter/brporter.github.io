@@ -28,6 +28,14 @@ layout: card
                 <li>Computer Restoration</li>
             </ul>
         </div>
+
+        <div class="card-section">
+            <h2>Patents</h2>
+            <ul class="patents">
+                <li><a href="https://patents.google.com/patent/US11677639B2" target="_blank">US11677639B2</a> - Connection management between applications and service resources</li>
+                <li><a href="https://patents.google.com/patent/US11438439B1" target="_blank">US11438439B1</a> - Detecting non-personal network and connectivity attributes for classifying user location</li>
+            </ul>
+        </div>
         
         <div class="card-footer">
             <a href="mailto:bryan@bryanporter.com" class="social-link">
