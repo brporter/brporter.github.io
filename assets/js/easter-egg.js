@@ -219,14 +219,21 @@ function closeEmulator() {
 }
 
 // FreeBSD v86 emulator functions
-// Use unpkg CDN which properly serves v86 files
-const V86_CDN = 'https://unpkg.com/v86@latest';
+// Get base path for local v86 assets
+function getV86BasePath() {
+    const scriptEl = document.querySelector('script[src*="easter-egg.js"]');
+    if (scriptEl) {
+        return scriptEl.src.replace('/js/easter-egg.js', '/v86');
+    }
+    return '/assets/v86';
+}
 
 async function launchFreeBSD() {
     const modal = document.getElementById('v86-modal');
     modal.classList.add('active');
     
     const screenContainer = document.getElementById('v86-screen');
+    const V86_PATH = getV86BasePath();
     
     // Reset screen container with required v86 DOM structure
     screenContainer.innerHTML = `
@@ -238,7 +245,7 @@ async function launchFreeBSD() {
     try {
         // Load v86 library dynamically if not already loaded
         if (typeof window.V86 === 'undefined') {
-            await loadScript(V86_CDN + '/build/libv86.js');
+            await loadScript(V86_PATH + '/libv86.js');
             // Wait for the global to be available
             await new Promise((resolve, reject) => {
                 let attempts = 0;
@@ -259,14 +266,14 @@ async function launchFreeBSD() {
         const loadingEl = screenContainer.querySelector('.v86-loading');
         if (loadingEl) loadingEl.textContent = 'Initializing emulator...';
         
-        // Initialize v86 emulator
+        // Initialize v86 emulator with locally hosted files
         v86emulator = new V86({
-            wasm_path: V86_CDN + '/build/v86.wasm',
+            wasm_path: V86_PATH + '/v86.wasm',
             memory_size: 64 * 1024 * 1024,
             vga_memory_size: 4 * 1024 * 1024,
             screen_container: screenContainer,
-            bios: { url: V86_CDN + '/bios/seabios.bin' },
-            vga_bios: { url: V86_CDN + '/bios/vgabios.bin' },
+            bios: { url: V86_PATH + '/seabios.bin' },
+            vga_bios: { url: V86_PATH + '/vgabios.bin' },
             cdrom: { url: 'https://i.copy.sh/freebsd.iso', async: true },
             autostart: true
         });
