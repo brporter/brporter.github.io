@@ -78,6 +78,7 @@
     <script>
         let typedChars = '';
         let typingTimeout = null;
+        let freebsdLoaded = false;
         
         const freebsdContainer = document.getElementById('freebsd-container');
         const freebsdFrame = document.getElementById('freebsd-frame');
@@ -89,8 +90,9 @@
             content.style.display = 'none';
             
             // Load FreeBSD in the iframe if not already loaded
-            if (freebsdFrame.src === 'about:blank' || freebsdFrame.src === '') {
+            if (!freebsdLoaded) {
                 freebsdFrame.src = 'https://copy.sh/v86/?profile=freebsd';
+                freebsdLoaded = true;
             }
         }
         
@@ -124,7 +126,7 @@
                 }, 2000);
                 
                 // Check if 'bsd' was typed
-                if (typedChars.includes('bsd')) {
+                if (typedChars.endsWith('bsd')) {
                     typedChars = '';
                     showFreeBSD();
                 }
