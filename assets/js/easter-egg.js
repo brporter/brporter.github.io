@@ -14,7 +14,6 @@ let bsdIndex = 0;
 let nes = null;
 let audioContext = null;
 let frameId = null;
-let v86emulator = null;
 
 // Listen for Konami code and BSD easter egg
 document.addEventListener('keydown', (e) => {
@@ -218,114 +217,21 @@ function closeEmulator() {
     nes = null;
 }
 
-// FreeBSD v86 emulator functions
-// Get base path for local v86 assets
-function getV86BasePath() {
-    const scriptEl = document.querySelector('script[src*="easter-egg.js"]');
-    if (scriptEl) {
-        return scriptEl.src.replace('/js/easter-egg.js', '/v86');
-    }
-    return '/assets/v86';
-}
-
-async function launchFreeBSD() {
+// FreeBSD v86 emulator functions using iframe
+function launchFreeBSD() {
     const modal = document.getElementById('v86-modal');
     modal.classList.add('active');
     
-    const screenContainer = document.getElementById('v86-screen');
-    const V86_PATH = getV86BasePath();
+    const frame = document.getElementById('v86-frame');
     
-    // Reset screen container with required v86 DOM structure
-    screenContainer.innerHTML = `
-        <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
-        <canvas style="display: none"></canvas>
-        <div class="v86-loading">Loading FreeBSD...<br>This may take a moment as the OS image downloads.</div>
-    `;
-    
-    try {
-        // Load v86 library dynamically if not already loaded
-        if (typeof window.V86 === 'undefined') {
-            await loadScript(V86_PATH + '/libv86.js');
-            // Wait for the global to be available
-            await new Promise((resolve, reject) => {
-                let attempts = 0;
-                const check = () => {
-                    if (typeof window.V86 !== 'undefined') {
-                        resolve();
-                    } else if (attempts++ > 50) {
-                        reject(new Error('V86 library failed to initialize'));
-                    } else {
-                        setTimeout(check, 100);
-                    }
-                };
-                check();
-            });
-        }
-        
-        // Remove loading message, keep the required elements
-        const loadingEl = screenContainer.querySelector('.v86-loading');
-        if (loadingEl) loadingEl.textContent = 'Initializing emulator...';
-        
-        // Initialize v86 emulator with locally hosted files
-        v86emulator = new V86({
-            wasm_path: V86_PATH + '/v86.wasm',
-            memory_size: 64 * 1024 * 1024,
-            vga_memory_size: 4 * 1024 * 1024,
-            screen_container: screenContainer,
-            bios: { url: V86_PATH + '/seabios.bin' },
-            vga_bios: { url: V86_PATH + '/vgabios.bin' },
-            cdrom: { url: 'https://i.copy.sh/freebsd.iso', async: true },
-            autostart: true
-        });
-        
-        // Listen for emulator ready - hide loading message
-        v86emulator.add_listener('emulator-ready', function() {
-            console.log('v86 emulator ready');
-            const loadingEl = screenContainer.querySelector('.v86-loading');
-            if (loadingEl) loadingEl.style.display = 'none';
-        });
-        
-        // Listen for errors
-        v86emulator.add_listener('emulator-stopped', function() {
-            console.log('v86 emulator stopped');
-        });
-        
-    } catch (error) {
-        console.error('Failed to load v86 emulator:', error);
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        screenContainer.innerHTML = '<div class="v86-error">Failed to load FreeBSD emulator: ' + (errorMsg || 'Unknown error') + '</div>';
+    // Load FreeBSD from copy.sh hosted emulator
+    // Only load once to avoid restarting the emulator each time
+    if (!frame.src || frame.src === 'about:blank') {
+        frame.src = 'https://copy.sh/v86/?profile=freebsd';
     }
-}
-
-// Add error handler for v86 fatal errors
-window.addEventListener('error', (e) => {
-    if (e.message && e.message.includes('v86')) {
-        console.error('v86 error:', e);
-    }
-});
-
-function loadScript(src) {
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-    });
 }
 
 function closeV86() {
     const modal = document.getElementById('v86-modal');
     modal.classList.remove('active');
-    
-    // Stop and cleanup v86 emulator
-    if (v86emulator) {
-        v86emulator.stop();
-        v86emulator.destroy();
-        v86emulator = null;
-    }
-    
-    // Clear the screen container
-    const screenContainer = document.getElementById('v86-screen');
-    screenContainer.innerHTML = '';
 }
