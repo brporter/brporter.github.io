@@ -229,22 +229,36 @@ async function launchFreeBSD() {
     screenContainer.innerHTML = '<div class="v86-loading">Loading FreeBSD... This may take a moment.</div>';
     
     try {
-        // Load v86 library dynamically
-        if (typeof V86Starter === 'undefined') {
-            await loadScript('https://cdn.jsdelivr.net/npm/v86@latest/build/libv86.js');
+        // Load v86 library dynamically if not already loaded
+        if (typeof window.V86 === 'undefined') {
+            await loadScript('https://copy.sh/v86/build/libv86.js');
+            // Wait for the global to be available
+            await new Promise((resolve, reject) => {
+                let attempts = 0;
+                const check = () => {
+                    if (typeof window.V86 !== 'undefined') {
+                        resolve();
+                    } else if (attempts++ > 50) {
+                        reject(new Error('V86 failed to load'));
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                };
+                check();
+            });
         }
         
         // Clear loading message
         screenContainer.innerHTML = '';
         
-        // Initialize v86 emulator
-        v86emulator = new V86Starter({
-            wasm_path: 'https://cdn.jsdelivr.net/npm/v86@latest/build/v86.wasm',
+        // Initialize v86 emulator using V86 (the correct global name)
+        v86emulator = new V86({
+            wasm_path: 'https://copy.sh/v86/build/v86.wasm',
             memory_size: 128 * 1024 * 1024,
             vga_memory_size: 8 * 1024 * 1024,
             screen_container: screenContainer,
-            bios: { url: 'https://cdn.jsdelivr.net/npm/v86@latest/bios/seabios.bin' },
-            vga_bios: { url: 'https://cdn.jsdelivr.net/npm/v86@latest/bios/vgabios.bin' },
+            bios: { url: 'https://copy.sh/v86/bios/seabios.bin' },
+            vga_bios: { url: 'https://copy.sh/v86/bios/vgabios.bin' },
             cdrom: { url: 'https://copy.sh/v86/images/freebsd.iso' },
             autostart: true
         });
