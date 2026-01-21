@@ -219,7 +219,8 @@ function closeEmulator() {
 }
 
 // FreeBSD v86 emulator functions
-const V86_CDN = 'https://cdn.jsdelivr.net/gh/copy/v86@latest';
+// Use unpkg CDN which properly serves v86 files
+const V86_CDN = 'https://unpkg.com/v86@latest';
 
 async function launchFreeBSD() {
     const modal = document.getElementById('v86-modal');
@@ -228,7 +229,7 @@ async function launchFreeBSD() {
     const screenContainer = document.getElementById('v86-screen');
     
     // Show loading message
-    screenContainer.innerHTML = '<div class="v86-loading">Loading FreeBSD... This may take a moment.</div>';
+    screenContainer.innerHTML = '<div class="v86-loading">Loading FreeBSD...<br>This may take a moment as the OS image downloads.</div>';
     
     try {
         // Load v86 library dynamically if not already loaded
@@ -241,7 +242,7 @@ async function launchFreeBSD() {
                     if (typeof window.V86 !== 'undefined') {
                         resolve();
                     } else if (attempts++ > 50) {
-                        reject(new Error('V86 failed to load'));
+                        reject(new Error('V86 library failed to initialize'));
                     } else {
                         setTimeout(check, 100);
                     }
@@ -250,27 +251,44 @@ async function launchFreeBSD() {
             });
         }
         
-        // Clear loading message
-        screenContainer.innerHTML = '';
+        // Clear loading message and prepare screen
+        screenContainer.innerHTML = '<div class="v86-loading">Initializing emulator...</div>';
         
-        // Initialize v86 emulator using V86 (the correct global name)
-        // Using jsDelivr CDN for CORS-friendly access
+        // Initialize v86 emulator
         v86emulator = new V86({
             wasm_path: V86_CDN + '/build/v86.wasm',
-            memory_size: 128 * 1024 * 1024,
-            vga_memory_size: 8 * 1024 * 1024,
+            memory_size: 64 * 1024 * 1024,
+            vga_memory_size: 4 * 1024 * 1024,
             screen_container: screenContainer,
             bios: { url: V86_CDN + '/bios/seabios.bin' },
             vga_bios: { url: V86_CDN + '/bios/vgabios.bin' },
-            cdrom: { url: 'https://cdn.jsdelivr.net/gh/nicholatian/v86-images/freebsd.iso' },
+            cdrom: { url: 'https://i.copy.sh/freebsd.iso', async: true },
             autostart: true
+        });
+        
+        // Listen for emulator ready
+        v86emulator.add_listener('emulator-ready', function() {
+            console.log('v86 emulator ready');
+        });
+        
+        // Listen for errors
+        v86emulator.add_listener('emulator-stopped', function() {
+            console.log('v86 emulator stopped');
         });
         
     } catch (error) {
         console.error('Failed to load v86 emulator:', error);
-        screenContainer.innerHTML = '<div class="v86-error">Failed to load FreeBSD emulator: ' + error.message + '</div>';
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        screenContainer.innerHTML = '<div class="v86-error">Failed to load FreeBSD emulator: ' + (errorMsg || 'Unknown error') + '</div>';
     }
 }
+
+// Add error handler for v86 fatal errors
+window.addEventListener('error', (e) => {
+    if (e.message && e.message.includes('v86')) {
+        console.error('v86 error:', e);
+    }
+});
 
 function loadScript(src) {
     return new Promise((resolve, reject) => {
