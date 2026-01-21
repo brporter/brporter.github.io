@@ -21,6 +21,18 @@
         </div>
     </div>
 
+    <!-- FreeBSD v86 Emulator Modal -->
+    <div id="v86-modal" class="modal">
+        <div class="modal-content v86-modal-content">
+            <span class="close-btn" onclick="closeV86()">&times;</span>
+            <h2>🐡 FreeBSD Easter Egg!</h2>
+            <div id="v86-screen"></div>
+            <div class="emulator-controls">
+                <p>You found the secret FreeBSD emulator! Use your keyboard to interact.</p>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/jsnes@1.2.1/dist/jsnes.min.js"></script>
     <script src="{{ '/assets/js/easter-egg.js' | relative_url }}"></script>
 </body>
