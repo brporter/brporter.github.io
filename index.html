@@ -1,1 +1,138 @@
-Hello, world.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello, world.</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background-color: #000;
+            color: #0f0;
+        }
+        
+        #content {
+            display: block;
+        }
+        
+        #freebsd-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1000;
+        }
+        
+        #freebsd-container.active {
+            display: block;
+        }
+        
+        #freebsd-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        #close-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #f00;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 14px;
+            z-index: 1001;
+            border-radius: 4px;
+        }
+        
+        #close-btn:hover {
+            background: #c00;
+        }
+        
+        #hint {
+            margin-top: 20px;
+            color: #0a0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>Hello, world.</h1>
+        <p id="hint">Hint: Try typing 'bsd'...</p>
+    </div>
+    
+    <div id="freebsd-container">
+        <button id="close-btn">Close (ESC)</button>
+        <iframe id="freebsd-frame" src="about:blank"></iframe>
+    </div>
+    
+    <script>
+        let typedChars = '';
+        let typingTimeout = null;
+        
+        const freebsdContainer = document.getElementById('freebsd-container');
+        const freebsdFrame = document.getElementById('freebsd-frame');
+        const closeBtn = document.getElementById('close-btn');
+        const content = document.getElementById('content');
+        
+        function showFreeBSD() {
+            freebsdContainer.classList.add('active');
+            content.style.display = 'none';
+            
+            // Load FreeBSD in the iframe if not already loaded
+            if (freebsdFrame.src === 'about:blank' || freebsdFrame.src === '') {
+                freebsdFrame.src = 'https://copy.sh/v86/?profile=freebsd';
+            }
+        }
+        
+        function hideFreeBSD() {
+            freebsdContainer.classList.remove('active');
+            content.style.display = 'block';
+        }
+        
+        // Listen for keyboard input
+        document.addEventListener('keydown', (e) => {
+            // Don't capture keys when FreeBSD is active
+            if (freebsdContainer.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    hideFreeBSD();
+                }
+                return;
+            }
+            
+            // Ignore modifier keys and special keys
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                typedChars += e.key.toLowerCase();
+                
+                // Clear the timeout
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                }
+                
+                // Reset after 2 seconds of no typing
+                typingTimeout = setTimeout(() => {
+                    typedChars = '';
+                }, 2000);
+                
+                // Check if 'bsd' was typed
+                if (typedChars.includes('bsd')) {
+                    typedChars = '';
+                    showFreeBSD();
+                }
+            }
+        });
+        
+        // Close button handler
+        closeBtn.addEventListener('click', hideFreeBSD);
+    </script>
+</body>
+</html>
