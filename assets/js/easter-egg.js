@@ -219,6 +219,8 @@ function closeEmulator() {
 }
 
 // FreeBSD v86 emulator functions
+const V86_CDN = 'https://cdn.jsdelivr.net/gh/copy/v86@latest';
+
 async function launchFreeBSD() {
     const modal = document.getElementById('v86-modal');
     modal.classList.add('active');
@@ -231,7 +233,7 @@ async function launchFreeBSD() {
     try {
         // Load v86 library dynamically if not already loaded
         if (typeof window.V86 === 'undefined') {
-            await loadScript('https://copy.sh/v86/build/libv86.js');
+            await loadScript(V86_CDN + '/build/libv86.js');
             // Wait for the global to be available
             await new Promise((resolve, reject) => {
                 let attempts = 0;
@@ -252,14 +254,15 @@ async function launchFreeBSD() {
         screenContainer.innerHTML = '';
         
         // Initialize v86 emulator using V86 (the correct global name)
+        // Using jsDelivr CDN for CORS-friendly access
         v86emulator = new V86({
-            wasm_path: 'https://copy.sh/v86/build/v86.wasm',
+            wasm_path: V86_CDN + '/build/v86.wasm',
             memory_size: 128 * 1024 * 1024,
             vga_memory_size: 8 * 1024 * 1024,
             screen_container: screenContainer,
-            bios: { url: 'https://copy.sh/v86/bios/seabios.bin' },
-            vga_bios: { url: 'https://copy.sh/v86/bios/vgabios.bin' },
-            cdrom: { url: 'https://copy.sh/v86/images/freebsd.iso' },
+            bios: { url: V86_CDN + '/bios/seabios.bin' },
+            vga_bios: { url: V86_CDN + '/bios/vgabios.bin' },
+            cdrom: { url: 'https://cdn.jsdelivr.net/gh/nicholatian/v86-images/freebsd.iso' },
             autostart: true
         });
         
