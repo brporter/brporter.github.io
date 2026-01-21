@@ -76,6 +76,10 @@
     </div>
     
     <script>
+        // Configuration constants
+        const TRIGGER_WORD = 'bsd';
+        const FREEBSD_EMULATOR_URL = 'https://copy.sh/v86/?profile=freebsd';
+        
         let typedChars = '';
         let typingTimeout = null;
         let freebsdLoaded = false;
@@ -91,7 +95,7 @@
             
             // Load FreeBSD in the iframe if not already loaded
             if (!freebsdLoaded) {
-                freebsdFrame.src = 'https://copy.sh/v86/?profile=freebsd';
+                freebsdFrame.src = FREEBSD_EMULATOR_URL;
                 freebsdLoaded = true;
             }
         }
@@ -125,8 +129,8 @@
                     typedChars = '';
                 }, 2000);
                 
-                // Check if 'bsd' was typed
-                if (typedChars.endsWith('bsd')) {
+                // Check if trigger word was typed
+                if (typedChars.endsWith(TRIGGER_WORD)) {
                     typedChars = '';
                     showFreeBSD();
                 }
