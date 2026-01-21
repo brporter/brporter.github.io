@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site.title }}</title>
+    <link rel="stylesheet" href="{{ '/assets/css/card.css' | relative_url }}">
+</head>
+<body>
+    {{ content }}
+
+    <!-- NES Emulator Modal -->
+    <div id="emulator-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeEmulator()">&times;</span>
+            <h2>🎮 Easter Egg Found!</h2>
+            <canvas id="nes-canvas" width="256" height="240"></canvas>
+            <div class="emulator-controls">
+                <p>Controls: Arrow Keys = D-Pad, Z = A, X = B, Enter = Start, Shift = Select</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FreeBSD v86 Emulator Modal -->
+    <div id="v86-modal" class="modal">
+        <div class="modal-content v86-modal-content">
+            <span class="close-btn" onclick="closeV86()">&times;</span>
+            <h2>🐡 FreeBSD Easter Egg!</h2>
+            <iframe id="v86-frame" style="width: 100%; height: 600px; border: none;"></iframe>
+            <div class="emulator-controls">
+                <p>You found the secret FreeBSD emulator! Use your keyboard to interact.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/jsnes@1.2.1/dist/jsnes.min.js"></script>
+    <script src="{{ '/assets/js/easter-egg.js' | relative_url }}"></script>
+</body>
+</html>
