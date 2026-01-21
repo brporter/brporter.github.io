@@ -228,8 +228,12 @@ async function launchFreeBSD() {
     
     const screenContainer = document.getElementById('v86-screen');
     
-    // Show loading message
-    screenContainer.innerHTML = '<div class="v86-loading">Loading FreeBSD...<br>This may take a moment as the OS image downloads.</div>';
+    // Reset screen container with required v86 DOM structure
+    screenContainer.innerHTML = `
+        <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+        <canvas style="display: none"></canvas>
+        <div class="v86-loading">Loading FreeBSD...<br>This may take a moment as the OS image downloads.</div>
+    `;
     
     try {
         // Load v86 library dynamically if not already loaded
@@ -251,8 +255,9 @@ async function launchFreeBSD() {
             });
         }
         
-        // Clear loading message and prepare screen
-        screenContainer.innerHTML = '<div class="v86-loading">Initializing emulator...</div>';
+        // Remove loading message, keep the required elements
+        const loadingEl = screenContainer.querySelector('.v86-loading');
+        if (loadingEl) loadingEl.textContent = 'Initializing emulator...';
         
         // Initialize v86 emulator
         v86emulator = new V86({
@@ -266,9 +271,11 @@ async function launchFreeBSD() {
             autostart: true
         });
         
-        // Listen for emulator ready
+        // Listen for emulator ready - hide loading message
         v86emulator.add_listener('emulator-ready', function() {
             console.log('v86 emulator ready');
+            const loadingEl = screenContainer.querySelector('.v86-loading');
+            if (loadingEl) loadingEl.style.display = 'none';
         });
         
         // Listen for errors
