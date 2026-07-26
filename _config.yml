@@ -49,3 +49,9 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+# Keep container/deploy tooling out of the built _site.
+exclude:
+  - Dockerfile
+  - deploy/
+  - README.md
